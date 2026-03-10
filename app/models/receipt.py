@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from app.database import Base
+import enum
 
-
-class ReceiptStatus(str, Enum):
+class ReceiptStatus(enum.Enum):
     PENDING   = "pending"   
     CONFIRMED = "confirmed"
     PREPARING = "preparing"

@@ -2,9 +2,10 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
+import enum
 
 
-class PaymentIntentStatus(Enum):
+class PaymentIntentStatus(enum.Enum):
     REQUIRES_PAYMENT_METHOD = "requires_payment_method"
     REQUIRES_CONFIRMATION = "requires_confirmation"
     REQUIRES_ACTION = "requires_action"
@@ -19,12 +20,10 @@ class Payment(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"),    nullable=False)
-    receipt_id = Column(Integer, ForeignKey("receipts.id"),
-                        unique=True, nullable=False)
+    receipt_id = Column(Integer, ForeignKey("receipts.id"), unique=True, nullable=False)
     amount = Column(Integer, nullable=False)
     currency = Column(String(10),    nullable=False)
-    status = Column(Enum(PaymentIntentStatus), nullable=False,
-                    default=PaymentIntentStatus.REQUIRES_PAYMENT_METHOD)
+    status = Column(Enum(PaymentIntentStatus), nullable=False, default=PaymentIntentStatus.REQUIRES_PAYMENT_METHOD)
     payment_method = Column(String(20),    nullable=False)
     transaction_id = Column(Integer, unique=True, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

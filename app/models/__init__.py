@@ -10,6 +10,6 @@ from .order_item import OrderItem
 from .otp import Otp
 from .receipt import Receipt
 from .feature import Feature
-from shipping_address import ShippingAddress
+from .shipping_address import ShippingAddress
 from .wishlist import Wishlist
 

@@ -14,7 +14,7 @@ class Product(Base):
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
-    category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     stock = Column(Integer, nullable=False)
     price = Column(Double,  nullable=False)
     average_rating = Column(Double,  nullable=False, default=0.0)

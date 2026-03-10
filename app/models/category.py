@@ -8,7 +8,7 @@ class Category(Base):
     id        = Column(Integer, primary_key=True, index=True)
     name      = Column(String(255),    nullable=False)
     lang_code = Column(String(3),    nullable=False)
-    parent_id = Column(Integer, ForeignKey("category.id"), nullable=True)
+    parent_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
 
     # relationships
     products  = relationship("Product", back_populates="category")
