@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -12,3 +12,7 @@ class Wishlist(Base):
     # relationships
     user    = relationship("User",    back_populates="wishlist")
     product = relationship("Product", back_populates="wishlists")
+
+    __table_args__ = (
+    UniqueConstraint('user_id', 'product_id'),
+)

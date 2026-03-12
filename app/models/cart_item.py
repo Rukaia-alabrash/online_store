@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -13,3 +13,7 @@ class CartItem(Base):
     # relationships
     cart = relationship("Cart", back_populates="cart_items")
     product = relationship("Product", back_populates="cart_items")
+
+    __table_args__ = (
+    UniqueConstraint('cart_id', 'product_id'),
+)

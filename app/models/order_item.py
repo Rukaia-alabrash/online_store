@@ -6,10 +6,10 @@ class OrderItem(Base):
     __tablename__ = "order_items"
 
     id         = Column(Integer, primary_key=True, index=True)
-    receipt_id = Column(Integer, ForeignKey("receipts.id"),  nullable=True)
-    product_id = Column(Integer, ForeignKey("products.id"),  nullable=True)
-    price      = Column(Double,  nullable=True)
-    quantity   = Column(Integer, nullable=True)
+    receipt_id = Column(Integer, ForeignKey("receipts.id"),  nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"),  nullable=False)
+    price      = Column(Double,  nullable=False)
+    quantity   = Column(Integer, nullable=False)
 
     # relationships
     receipt = relationship("Receipt", back_populates="order_items")
