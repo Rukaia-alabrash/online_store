@@ -28,6 +28,6 @@ class Product(Base):
     cart_items           = relationship("CartItem", back_populates="product")
     features     = relationship("Feature", secondary=product_features , back_populates="products")
     product_translations = relationship("ProductTranslation", back_populates="product")
-    images               = relationship("ProductsImage", back_populates="product")
+    images               = relationship("ProductImage", back_populates="product")
     wishlists            = relationship("Wishlist", back_populates="product")
     order_items          = relationship("OrderItem", back_populates="product")
