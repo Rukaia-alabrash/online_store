@@ -7,7 +7,16 @@ product_features = Table(
     'product_features',
     Base.metadata,
     Column('product_id', Integer, ForeignKey('products.id'), primary_key=True),
+
     Column('feature_id', Integer, ForeignKey('features.id'), primary_key=True)
+)
+
+product_categories = Table(
+    'product_categories',
+    Base.metadata,
+    Column('product_id', Integer, ForeignKey('products.id'), primary_key=True),
+
+    Column('category_id', Integer, ForeignKey('categories.id'), primary_key=True)
 )
 
 class Product(Base):
@@ -24,10 +33,11 @@ class Product(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # relationships
-    category             = relationship("Category", back_populates="products")
+    categories           = relationship("Category", secondary=product_categories , back_populates="products")
     cart_items           = relationship("CartItem", back_populates="product")
-    features     = relationship("Feature", secondary=product_features , back_populates="products")
+    features             = relationship("Feature", secondary=product_features , back_populates="products")
     product_translations = relationship("ProductTranslation", back_populates="product")
     images               = relationship("ProductsImage", back_populates="product")
     wishlists            = relationship("Wishlist", back_populates="product")
     order_items          = relationship("OrderItem", back_populates="product")
+

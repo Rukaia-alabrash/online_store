@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import Base
-
+from .product import product_categories
 class Category(Base):
     __tablename__ = 'categories'
 
@@ -14,3 +14,4 @@ class Category(Base):
     products  = relationship("Product", back_populates="category")
     parent = relationship("Category", remote_side=[id], back_populates="children")
     children = relationship("Category", back_populates="parent")
+    products = relationship("Product", secondary=product_categories ,back_populates="categories")
