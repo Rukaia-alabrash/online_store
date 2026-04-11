@@ -10,4 +10,4 @@ class Otp(Base):
     otp_code = Column(String(6), nullable=False)
 
     # relationships
-    user = relationship("User", back_populates="otp")
+    user = relationship("User", back_populates="otps")

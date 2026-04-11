@@ -29,5 +29,5 @@ class Payment(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # relationships
-    user = relationship("Users",    back_populates="payments")
-    receipt = relationship("Receipts", back_populates="payment")
+    user = relationship("User",    back_populates="payments")
+    receipt = relationship("Receipt", back_populates="payment")

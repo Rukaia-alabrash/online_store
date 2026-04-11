@@ -28,7 +28,7 @@ class Product(Base):
     price = Column(Double,  nullable=False)
     average_rating = Column(Double,  nullable=False, default=0.0)
     discount_percentage = Column(Double,  nullable=True)
-    discount_expiry = Column(Date,nullable=True)
+    discount_expiry = Column(DateTime(timezone=True),nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -37,7 +37,8 @@ class Product(Base):
     cart_items           = relationship("CartItem", back_populates="product")
     features             = relationship("Feature", secondary=product_features , back_populates="products")
     product_translations = relationship("ProductTranslation", back_populates="product")
-    images               = relationship("ProductsImage", back_populates="product")
+    images               = relationship("ProductImage", back_populates="product")
     wishlists            = relationship("Wishlist", back_populates="product")
     order_items          = relationship("OrderItem", back_populates="product")
+    reviews              = relationship("Review", back_populates="product")
 
