@@ -1,6 +1,6 @@
 from fastapi import HTTPException , Depends
 from app.models import user
-from app.database import db, get_db
+from app.database import get_db
 from app.models import user
 from sqlalchemy.orm import Session
 from app.models.user import User, UserRole

@@ -24,11 +24,11 @@ def seed_user(db: Session):
     if existing:
         return
     
-    password = pwd_context.hash("Qwer1234")
+    password = pwd_context.hash("del1234")
 
     user = User(
-        name="rukaia",
-        email="rukaia@gmail.com",
+        name="del",
+        email="del@test.com",
         password=password,
         role=UserRole.USER
     )

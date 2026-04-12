@@ -6,7 +6,7 @@ from app.database import get_db
 from app.dependencies import require_admin, get_current_user
 from app.models.user import User , UserRole 
 from app.routers.shared.auth_service import AuthService
-from app.routers.users import pagination_user, user_out,user_shema
+from app.routers.users import pagination_user, user_out ,user_shema
 from app.routers.users.user_service import BasicService, UserReader, UserWriter 
 import math
 
@@ -66,6 +66,6 @@ def delete_user(id : int ,
     
     #Delete the user using the UserWriter service
     service = UserWriter(db)
-    service.delete_user(id=id, current_user=current_user)
+    service.delete_user(id=id)
 
     return True
