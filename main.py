@@ -5,6 +5,7 @@ from app.database import engine, Base, get_db
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.auth.auth_routers import router as auth_router
 from app.seed_data import seed_user
+from app.routers.users.user_routers import router as user_router
 
 app = FastAPI()
 
@@ -19,3 +20,4 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(user_router)
