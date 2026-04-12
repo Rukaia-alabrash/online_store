@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 from app.database import get_db
 from app.models.user import User, UserRole
 from app.schemas import LoginRequest , RegisterRequest
+from app.dependencies import get_current_user , require_admin
+
 
 #read .env file
 load_dotenv()
@@ -47,12 +49,9 @@ def create_refresh_token(data: dict) -> str:
 #-------------- Login --------------
 @router.post("/login")
 def login(data: LoginRequest, db: Session = Depends(get_db)):
-
     user = db.query(User).filter(User.email == data.email).first()
-
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-
     if not pwd_context.verify(data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
@@ -115,7 +114,11 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
     }
 
 @router.post("/logout")
-def logout():
+def logout(current_user: User = Depends(get_current_user)):
     # For JWT, logout is typically handled on the client side by deleting the token.
     # Optionally, you can implement token blacklisting on the server side.
     return {"message": "Logged out successfully"}
+
+@router.get("/me")
+def get_me(current_user: User = Depends(get_current_user)):
+    return current_user

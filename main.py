@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 import os
-from app.database import engine, Base
+from fastapi.concurrency import asynccontextmanager
+from app.database import engine, Base, get_db
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.auth.auth_routers import router as auth_router
+from app.seed_data import seed_user
 
 app = FastAPI()
 

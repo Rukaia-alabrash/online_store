@@ -1,17 +1,30 @@
-from app.database import get_db
+from alembic.migration import contextmanager
+from dotenv import load_dotenv
+from app.database import SessionLocal, get_db
 from app.models.user import User, UserRole
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 
+load_dotenv()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+@contextmanager
+def get_db_session():
+    # Create a new database session for seeding data.
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 def seed_user(db: Session):
-    existing = db.query(User).filter(User.email=="rukaia@gmail.com").first()
+    # Check if the user already exists to avoid duplicates.
+    existing = db.query(User).filter(User.email == "rukaia@gmail.com").first()
     if existing:
         return
-    password = pwd_context.hash("123")
+    
+    password = pwd_context.hash("Qwer1234")
 
     user = User(
         name="rukaia",
@@ -27,12 +40,9 @@ def seed_user(db: Session):
 
 
 def main():
-    # Create a database session and seed initial data.
-    db = next(get_db())
-    try:
+    # Seed the database with initial data.
+    with get_db_session() as db:
         seed_user(db)
-    finally:
-        db.close()
 
 
 if __name__ == "__main__":
