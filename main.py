@@ -1,5 +1,21 @@
-from fastapi import FastAPI , HTTPException
-from pydantic import BaseModel , Field
-from uuid import UUID
+from fastapi import FastAPI
+import os
+from fastapi.concurrency import asynccontextmanager
+from app.database import engine, Base, get_db
+from fastapi.middleware.cors import CORSMiddleware
+from app.routers.auth.auth_routers import router as auth_router
+from app.seed_data import seed_user
 
 app = FastAPI()
+
+Base.metadata.create_all(bind=engine) 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # React app URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth_router)

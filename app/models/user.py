@@ -6,8 +6,8 @@ import enum
 
 
 class UserRole(enum.Enum):
-    ADMIN = "admin"
-    USER = "user"
+    ADMIN = "ADMIN"
+    USER = "USER"
 
 
 class User(Base):
@@ -17,7 +17,7 @@ class User(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     name = Column(String(255), nullable=False)
     password = Column(String(255), nullable=False)
-    avater = Column(String(1024), nullable=True)
+    avatar = Column(String(1024), nullable=True)
     role = Column(Enum(UserRole), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now())
