@@ -18,7 +18,7 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ):
-    # نأخذ التوكن مباشرة بدون أي معالجة إضافية
+    # Extract the token from the Authorization header
     token = credentials.credentials
 
     try:
