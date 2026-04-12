@@ -1,0 +1,8 @@
+from pydantic import BaseModel
+from app.models.user import UserRole
+
+class UserUpdate(BaseModel):
+    name: str
+    email : str
+    avater: str 
+    role: UserRole
