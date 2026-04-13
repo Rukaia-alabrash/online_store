@@ -3,15 +3,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
-from jose import jwt
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 import os
 from dotenv import load_dotenv
 
 from app.database import get_db
 from app.models.user import User, UserRole
-from app.schemas import LoginRequest , RegisterRequest
-from app.dependencies import get_current_user , require_admin
+from app.schemas import LoginRequest , RegisterRequest , RefreshTokenRequest , ForgotPasswordRequest , ChangePasswordRequest
+from app.dependencies import get_current_user , get_current_admin
+from app.core.security import hash_password, verify_password, validate_password
 
 
 #read .env file
@@ -45,6 +46,19 @@ def create_refresh_token(data: dict) -> str:
     return encoded_jwt
 
 
+def create_password_reset_token(email: str):
+    expire = datetime.now(timezone.utc) + timedelta(hours=1)
+
+    payload = {
+        "sub": email,
+        "exp": expire,
+        "type": "reset"
+    }
+
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return token
+
+
 
 #-------------- Login --------------
 @router.post("/login")
@@ -52,7 +66,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if not pwd_context.verify(data.password, user.password):
+    if not verify_password(data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token({"sub": str(user.id)})
@@ -81,7 +95,7 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=409, detail="User already exists")
 
     # 2. hash password
-    hashed_password = pwd_context.hash(data.password)
+    hashed_password = hash_password(data.password)
 
     # 3. create user
     new_user = User(
@@ -119,6 +133,100 @@ def logout(current_user: User = Depends(get_current_user)):
     # Optionally, you can implement token blacklisting on the server side.
     return {"message": "Logged out successfully"}
 
+
+#-------------- Refresh Token --------------
+@router.post("/refresh")
+def refresh_token(data: RefreshTokenRequest, db: Session = Depends(get_db)):
+
+    refresh_token = data.refreshToken
+
+    try:
+        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token"
+            )
+
+        user_id = int(user_id)
+
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token"
+        )
+
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token"
+        )
+
+    # Generate new tokens
+    new_access_token = create_access_token({"sub": str(user.id)})
+    new_refresh_token = create_refresh_token({"sub": str(user.id)})
+
+    return {
+        "token": new_access_token,
+        "refreshToken": new_refresh_token
+    }
+
+#-------------- Forgot Password --------------
+@router.post("/forgot-password")
+def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
+
+    user = db.query(User).filter(User.email == data.email).first()
+
+    if user:
+        reset_token = create_password_reset_token(user.email)
+
+        reset_link = f"http://localhost:3000/reset-password?token={reset_token}"
+
+        # In a real application, you would send this link via email to the user.
+        print(reset_link)
+
+    return {
+        "message": "If an account with that email exists, a reset link has been sent."
+    }
+
+#-------------- Change Password --------------  
+@router.post("/auth/change-password")
+def change_password(
+    data: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+
+    # check current password
+    if not verify_password(data.currentPassword, current_user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Current password is incorrect"
+        )
+
+    # validate new password
+    if not validate_password(data.newPassword):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid new password"
+        )
+
+    # تحديث كلمة المرور
+    hashed_password = hash_password(data.newPassword)
+    current_user.password = hashed_password
+
+    db.commit()
+
+    return {
+        "message": "Password changed successfully"
+    }
+
 @router.get("/me")
-def get_me(current_user: User = Depends(get_current_user)):
-    return current_user
+def get_me(admin: User = Depends(get_current_admin),db: Session = Depends(get_db)):
+    return {"message": "hi admin" , "admin": admin.name}
+
+

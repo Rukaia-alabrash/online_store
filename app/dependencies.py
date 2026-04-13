@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 
 from app.database import get_db
-from app.models.user import User
+from app.models.user import User , UserRole
 
 load_dotenv()
 
@@ -50,3 +50,11 @@ def get_current_user(
         )
 
     return user
+
+def get_current_admin(current_user: User = Depends(get_current_user)):
+    if not current_user.role == UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    return current_user

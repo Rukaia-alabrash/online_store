@@ -30,7 +30,7 @@ def seed_user(db: Session):
         name="rukaia",
         email="rukaia@gmail.com",
         password=password,
-        role=UserRole.USER
+        role=UserRole.ADMIN,
     )
     db.add(user)
     db.commit()
