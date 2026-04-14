@@ -214,13 +214,13 @@ class ProductService:
     
 
     @staticmethod
-    async def upload_product_images(product_id:int, files: List[UploadFile], lang:str, db:Session)-> dict:
+    def upload_product_images(product_id:int, files: List[UploadFile], lang:str, db:Session)-> dict:
         product = db.query(Product).filter(Product.id == product_id).first()
         if not product:
             raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Product not found")
         
         for index , file in enumerate(files):
-            result = await upload_to_cloudinary(file, folder="products", max_size_mb= 5)
+            result = upload_to_cloudinary(file, folder="products", max_size_mb= 5)
 
             db.add(ProductImage(
                 product_id  = product_id,

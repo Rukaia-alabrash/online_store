@@ -55,6 +55,7 @@ def get_current_user(
 
     return user
 
+<<<<<<< HEAD
 def get_current_admin(current_user: User = Depends(get_current_user)):
     if not current_user.role == UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Not enough permissions")
@@ -66,3 +67,14 @@ def require_admin(current_user:User=Depends(get_current_user)):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin privileges required")
     return current_user  
 
+=======
+
+def require_admin(current_user: User = Depends(get_current_user)):
+    if current_user.role.value.lower() != "admin":
+        print(current_user.role.value)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required"
+        )
+    return True
+>>>>>>> 7bc2e40e79bec43af059136fce9cd147f0d6f29a
