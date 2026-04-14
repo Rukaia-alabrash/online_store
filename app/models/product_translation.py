@@ -7,9 +7,11 @@ class ProductTranslation(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     lang_code = Column(String(3), nullable=False)
     name = Column(String(255), nullable=False)
     description = Column(Text,nullable=False)
 
     # relationships
     product = relationship("Product", back_populates="product_translations")
+    category  = relationship("Category", back_populates="products")

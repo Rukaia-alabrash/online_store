@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import Base
-
 class Category(Base):
     __tablename__ = 'categories'
 
@@ -11,6 +10,6 @@ class Category(Base):
     parent_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
 
     # relationships
-    products  = relationship("Product", back_populates="category")
+    products  = relationship("ProductTranslation", back_populates="category")
     parent = relationship("Category", remote_side=[id], back_populates="children")
     children = relationship("Category", back_populates="parent")

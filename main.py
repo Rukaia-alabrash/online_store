@@ -4,12 +4,17 @@ from fastapi.concurrency import asynccontextmanager
 from app.database import engine, Base, get_db
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.auth.auth_routers import router as auth_router
+from app.routers.products.product_routers import router as product_router
 from app.seed_data import seed_user
 from app.routers.users.user_routers import router as user_router
 
-app = FastAPI()
+from fastapi.openapi.utils import get_openapi
 
-Base.metadata.create_all(bind=engine) 
+
+# main.py
+app = FastAPI() 
+
+Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,4 +25,8 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+<<<<<<< HEAD
 app.include_router(user_router)
+=======
+app.include_router(product_router)
+>>>>>>> e7ac2895e6a2659ea5581aa82e4f13fe958efa00
