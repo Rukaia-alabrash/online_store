@@ -15,7 +15,8 @@ config = context.config
 
 # 2. Dynamically set the sqlalchemy.url from environment variables
 # This overrides whatever is written in alembic.ini
-
+db_url = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost/dbname")
+config.set_main_option("sqlalchemy.url", db_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
