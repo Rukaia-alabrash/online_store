@@ -29,3 +29,4 @@ class User(Base):
     receipts = relationship("Receipt", back_populates="user")
     wishlist = relationship("Wishlist", back_populates="user")
     payments = relationship("Payment", back_populates="user")
+    reviews = relationship("Review", back_populates="user")

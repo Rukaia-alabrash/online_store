@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from app.database import get_db
 from app.models.user import User, UserRole
 from app.schemas import LoginRequest , RegisterRequest , RefreshTokenRequest , ForgotPasswordRequest , ChangePasswordRequest
-from app.dependencies import get_current_user , get_current_admin
+from app.dependencies import get_current_user , require_admin
 from app.core.security import hash_password, verify_password, validate_password
 
 
@@ -215,7 +215,7 @@ def change_password(
             detail="Invalid new password"
         )
 
-    # تحديث كلمة المرور
+    # update password
     hashed_password = hash_password(data.newPassword)
     current_user.password = hashed_password
 
@@ -226,7 +226,7 @@ def change_password(
     }
 
 @router.get("/me")
-def get_me(admin: User = Depends(get_current_admin),db: Session = Depends(get_db)):
+def get_me(admin: User = Depends(require_admin),db: Session = Depends(get_db)):
     return {"message": "hi admin" , "admin": admin.name}
 
 

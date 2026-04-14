@@ -12,4 +12,5 @@ from .receipt import Receipt
 from .feature import Feature
 from .shipping_address import ShippingAddress
 from .wishlist import Wishlist
+from .review import Review
 
