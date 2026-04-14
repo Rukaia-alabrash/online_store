@@ -25,8 +25,5 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
-<<<<<<< HEAD
 app.include_router(user_router)
-=======
 app.include_router(product_router)
->>>>>>> e7ac2895e6a2659ea5581aa82e4f13fe958efa00
