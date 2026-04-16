@@ -6,11 +6,8 @@ import os
 from dotenv import load_dotenv
 
 from app.database import get_db
-<<<<<<< HEAD
-from app.models.user import User , UserRole
-=======
+
 from app.models.user import User, UserRole
->>>>>>> 9837e79ab1480042f0174514e17e5d8af7930f26
 
 load_dotenv()
 
