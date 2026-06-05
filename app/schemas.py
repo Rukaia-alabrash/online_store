@@ -56,3 +56,11 @@ class ChangePasswordRequest(BaseModel):
             raise ValueError("Must contain number")
 
         return v
+    
+class VerifyOtpRequest(BaseModel):
+    email: EmailStr
+    otp_code: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    newPassword: str
