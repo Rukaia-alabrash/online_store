@@ -12,7 +12,7 @@ cloudinary.config(
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
-def upload_to_cloudinary(
+async def upload_to_cloudinary(
     file: UploadFile,
     folder: str,
     max_size_mb: int = 5,
@@ -25,7 +25,7 @@ def upload_to_cloudinary(
         )
 
     # Validate size
-    contents =  file.read()
+    contents =  await file.read()
     size_mb = len(contents) / (1024 * 1024)
     if size_mb > max_size_mb:
         raise HTTPException(
