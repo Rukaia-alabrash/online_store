@@ -10,7 +10,7 @@ class ShippingAddress(Base):
     full_name = Column(String(255),    nullable=False)
     address   = Column(String(255),    nullable=False)
     city      = Column(String(100),    nullable=False)
-    zip_code  = Column(Integer, nullable=False)
+    zip_code  = Column(String(20), nullable=False)
 
     # relationships
     user     = relationship("User",    back_populates="shipping_address")

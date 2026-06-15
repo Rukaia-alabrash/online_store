@@ -24,8 +24,8 @@ class Payment(Base):
     amount = Column(Integer, nullable=False)
     currency = Column(String(10),    nullable=False)
     status = Column(Enum(PaymentIntentStatus), nullable=False, default=PaymentIntentStatus.REQUIRES_PAYMENT_METHOD)
-    payment_method = Column(String(20),    nullable=False)
-    transaction_id = Column(String(20), unique=True, nullable=True)
+    payment_method = Column(String(100),    nullable=False)
+    transaction_id = Column(String(100), unique=True, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # relationships

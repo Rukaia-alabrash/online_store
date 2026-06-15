@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 import os
 from fastapi.concurrency import asynccontextmanager
@@ -5,6 +8,7 @@ from app.database import engine, Base, get_db
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.auth.auth_routers import router as auth_router
 from app.routers.products.product_routers import router as product_router
+from app.routers.payments.payment_routers import router as payment_router
 from app.seed_data import seed_user
 from app.routers.users.user_routers import router as user_router
 
@@ -12,7 +16,20 @@ from fastapi.openapi.utils import get_openapi
 
 
 # main.py
-app = FastAPI() 
+app = FastAPI(
+    title="E-commerce API",
+    version="1.0.0",
+    servers=[
+        {
+            "url": "https://online-store-0jq7.onrender.com",
+            "description": "Production server"
+        },
+        {
+            "url": "http://localhost:8000",
+            "description": "Local development"
+        }
+    ]
+) 
 
 Base.metadata.create_all(bind=engine)
 
@@ -27,3 +44,4 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(product_router)
+app.include_router(payment_router)
