@@ -10,6 +10,8 @@ class OrderItem(Base):
     product_id = Column(Integer, ForeignKey("products.id"),  nullable=False)
     price      = Column(Double,  nullable=False)
     quantity   = Column(Integer, nullable=False)
+    name  = Column(String, nullable=False)
+    image = Column(String, nullable=True)
 
     # relationships
     receipt = relationship("Receipt", back_populates="order_items")

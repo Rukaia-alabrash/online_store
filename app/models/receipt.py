@@ -6,7 +6,7 @@ import enum
 class ReceiptStatus(enum.Enum):
     PENDING   = "pending"   
     CONFIRMED = "confirmed"
-    PREPARING = "preparing"
+    PROCESSING = "processing"
     SHIPPED   = "shipped"
     DELIVERED = "delivered"
     CANCELLED = "cancelled"
