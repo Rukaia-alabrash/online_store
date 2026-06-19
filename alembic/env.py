@@ -16,7 +16,7 @@ load_dotenv()
 config = context.config
 # 2. Dynamically set the sqlalchemy.url from environment variables
 # This overrides whatever is written in alembic.ini
-db_url = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost/dbname")
+db_url = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 config.set_main_option("sqlalchemy.url", db_url)
 
 # Interpret the config file for Python logging.
