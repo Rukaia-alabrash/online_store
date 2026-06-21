@@ -4,26 +4,27 @@ from pydantic import BaseModel
 
 from app.models.receipt import ReceiptStatus
 from app.routers.shared.pagination import Pagination
+from pydantic import Field
 
 
 # ---------- Shipping Address ----------
 
 class ShippingAddressOut(BaseModel):
-    fullName: str
-    email: str
+    full_name: str
     address: str
     city: str
-    zipCode: str
+    zip_code: str
 
     model_config = {"from_attributes": True}
 
 
 class ShippingAddressIn(BaseModel):
-    fullName: str
-    email: str
+    full_name: str = Field(alias="fullName")
     address: str
     city: str
-    zipCode: str
+    zip_code: str = Field(alias="zipCode")
+
+    model_config = {"populate_by_name": True}
 
 
 # ---------- Order Item ----------
@@ -46,22 +47,24 @@ class OrderItemIn(BaseModel):
 
 class OrderOut(BaseModel):
     id: str
-    userId: str
+    user_id: str
     items: List[OrderItemOut]
     total: float  # total_price is Numeric(10,2) in DB now, no cents conversion needed
     status: str
-    shippingAddress: ShippingAddressOut
-    createdAt: datetime
-    updatedAt: Optional[datetime] = None
+    shipping_address: ShippingAddressOut
+    created_at: datetime
+    updated_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
 
 class OrderCreate(BaseModel):
-    userId: str
+    user_id: str = Field(alias="user_id")
     items: List[OrderItemIn]
     total: float
-    shippingAddress: ShippingAddressIn
+    shipping_address: ShippingAddressIn = Field(alias="shipping_address")
+
+    model_config = {"populate_by_name": True}
 
 
 class UpdateOrderStatusBody(BaseModel):
