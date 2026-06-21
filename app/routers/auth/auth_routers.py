@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 from app.database import get_db
 from app.models.user import User, UserRole
-from app.schemas import LoginRequest , RegisterRequest , RefreshTokenRequest , ForgotPasswordRequest , ChangePasswordRequest , VerifyOtpRequest , ResetPasswordRequest
+from app.schemas import LoginRequest , RegisterRequest , RefreshTokenRequest , ForgotPasswordRequest , ChangePasswordRequest , ResetPasswordRequest
 from app.dependencies import get_current_user , require_admin
 from app.core.security import hash_password, verify_password, validate_password
 from app.models.otp import Otp
@@ -63,12 +63,6 @@ def create_password_reset_token(email: str):
     return token
 
 
-#----------- Generate OTP code -------------
-def generate_otp() -> str:
-    return str(random.randint(100000, 999999))
-
-
-
 #-------------- Login --------------
 @router.post("/login")
 def login(data: LoginRequest, db: Session = Depends(get_db)):
@@ -77,10 +71,6 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     if not verify_password(data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-
-
-    if not user.is_verified:
-        raise HTTPException(status_code=403, detail="Please verify your email first")
 
 
     access_token = create_access_token({"sub": str(user.id)})
@@ -118,37 +108,24 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
         password=hashed_password,
         role=UserRole.USER,
         avatar="",
-        is_verified=False
     )
     db.add(new_user)
-    db.flush()  
-
-    # 4. generate OTP
-    otp_code = generate_otp()
-    expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
-
-    otp_entry = Otp(
-        user_id=new_user.id,
-        otp_code=otp_code,
-        expires_at=expires_at
-    )
-    db.add(otp_entry)
-
-    # 5. send OTP email
-    try:
-        send_otp_email(new_user.email, otp_code)
-    except Exception:
-        db.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to send verification email. Please try again."
-        )
-
     db.commit()
     db.refresh(new_user)
+    access_token = create_access_token({"sub": str(new_user.id)})
+    refresh_token = create_refresh_token({"sub": str(new_user.id)})
 
-    return {"message": "Account created. Check your email for the verification code."}
-
+    return {
+        "user": {
+            "id": str(new_user.id),
+            "name": new_user.name,
+            "email": new_user.email,
+            "role": new_user.role.value,
+            "avatar": new_user.avatar or ""
+        },
+        "token": access_token,
+        "refreshToken": refresh_token
+    }
 
 @router.post("/logout")
 def logout(current_user: User = Depends(get_current_user)):
@@ -278,55 +255,6 @@ def change_password(
 
     return {
         "message": "Password changed successfully"
-    }
-
-
-
-# ------------- Verify OTP --------------
-
-@router.post("/verify-otp")
-def verify_otp(data: VerifyOtpRequest, db: Session = Depends(get_db)):
-
-    user = db.query(User).filter(User.email == data.email).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # get latest OTP
-    otp_entry = (
-        db.query(Otp)
-        .filter(Otp.user_id == user.id)
-        .order_by(Otp.expires_at.desc())
-        .first()
-    )
-
-    if not otp_entry:
-        raise HTTPException(status_code=400, detail="No OTP found")
-
-    if datetime.now(timezone.utc) > otp_entry.expires_at:
-        raise HTTPException(status_code=400, detail="OTP expired")
-
-    if otp_entry.otp_code != data.otp_code:
-        raise HTTPException(status_code=400, detail="Invalid OTP")
-
-    # mark user as verified
-    user.is_verified = True
-    db.delete(otp_entry) # delete OTP after successful verification 
-    db.commit()
-
-    # return tokens
-    access_token = create_access_token({"sub": str(user.id)})
-    refresh_token = create_refresh_token({"sub": str(user.id)})
-
-    return {
-        "user": {
-            "id": str(user.id),
-            "name": user.name,
-            "email": user.email,
-            "role": user.role.value,
-            "avatar": user.avatar or ""
-        },
-        "token": access_token,
-        "refreshToken": refresh_token
     }
 
 
