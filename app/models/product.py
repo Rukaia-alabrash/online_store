@@ -29,7 +29,7 @@ class Product(Base):
     features             = relationship("Feature", secondary=product_features , back_populates="products")
     product_translations = relationship("ProductTranslation", back_populates="product", cascade="all, delete-orphan")
     images               = relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
-    wishlists            = relationship("Wishlist", back_populates="product")
+    favorites            = relationship("Favorite", back_populates="product")
     order_items          = relationship("OrderItem", back_populates="product")
     reviews              = relationship("Review", back_populates="product")
 
