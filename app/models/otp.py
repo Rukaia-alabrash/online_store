@@ -8,7 +8,6 @@ class Otp(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     otp_code = Column(String(6), nullable=False)
-    expires_at = Column(DateTime(timezone=True), nullable=False)
 
     # relationships
     user = relationship("User", back_populates="otps")
