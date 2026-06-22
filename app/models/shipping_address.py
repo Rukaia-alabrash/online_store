@@ -15,3 +15,7 @@ class ShippingAddress(Base):
     # relationships
     user     = relationship("User",    back_populates="shipping_address")
     receipts = relationship("Receipt", back_populates="shipping_address")
+
+    @property
+    def email(self) -> str:
+        return self.user.email
