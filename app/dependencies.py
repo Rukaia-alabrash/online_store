@@ -4,6 +4,7 @@ from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 import os
 from dotenv import load_dotenv
+from fastapi import Header
 
 from app.database import get_db
 
@@ -61,3 +62,13 @@ def require_admin(current_user: User = Depends(get_current_user)):
             detail="Admin privileges required"
         )
     return True
+
+def get_language(accept_language: str = Header(default="en", alias="Accept-Language")) -> str:
+    """
+    Reads the Accept-Language header. Falls back to 'en' if missing
+    or if the value isn't one of the supported languages.
+    """
+    supported_languages = {"en", "ar"}
+    if accept_language not in supported_languages:
+        return "en"
+    return accept_language

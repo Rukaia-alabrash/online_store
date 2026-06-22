@@ -64,7 +64,6 @@ def delete_user(id : int ,
                 current_user: User = Depends(require_admin),
                 db: Session = Depends(get_db)):
     
-    #Delete the user using the UserWriter service
     service = UserWriter(db)
     service.delete_user(id=id)
 
