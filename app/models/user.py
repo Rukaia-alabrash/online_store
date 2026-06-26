@@ -27,6 +27,6 @@ class User(Base):
     otps = relationship("Otp", back_populates="user")
     shipping_address = relationship("ShippingAddress", back_populates="user")
     receipts = relationship("Receipt", back_populates="user")
-    wishlist = relationship("Wishlist", back_populates="user")
+    favorites = relationship("Favorite", back_populates="user")
     payments = relationship("Payment", back_populates="user")
     reviews = relationship("Review", back_populates="user")
