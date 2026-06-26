@@ -17,16 +17,13 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 class PaymentService:
 
-    # ------------------------------------------------------------------ #
-    #  CREATE INTENT — called from POST /payments/create-intent           #
-    # ------------------------------------------------------------------ #
+    
     @staticmethod
     def create_payment_intent(
         payload: CreatePaymentIntentRequest,
         current_user: User,
         db: Session,
     ):
-        # 1. Validate shipping address belongs to this user
         shipping_address = (
             db.query(ShippingAddress)
             .filter(
