@@ -12,6 +12,7 @@ from app.routers.payments.payment_routers import router as payment_router
 from app.seed_data import seed_user
 from app.routers.users.user_routers import router as user_router
 from app.routers.order.router import router as order_router
+from app.routers.profile.profile_routers import router as profile_router
 
 
 from fastapi.openapi.utils import get_openapi
@@ -48,3 +49,4 @@ app.include_router(user_router)
 app.include_router(product_router)
 app.include_router(payment_router)
 app.include_router(order_router)
+app.include_router(profile_router)
