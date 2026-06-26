@@ -113,6 +113,8 @@ class ProductService:
         q = filter_products(q,lang ,category, search, minPrice, 
         maxPrice, rating)
 
+        total = q.distinct().count()
+
         # sorting
         if sortBy in ['price','rating']:
             sortBy = 'average_rating' if sortBy == 'rating' else sortBy
@@ -123,12 +125,11 @@ class ProductService:
                 q = q.order_by(sort_column)
         elif sortBy == 'name':
             if sortOrder == 'desc':
-                q = q.join(Product.product_translations).order_by(desc(ProductTranslation.name))
+                q = q.order_by(desc(ProductTranslation.name))
             else:
-                q = q.join(Product.product_translations).order_by(ProductTranslation.name)
+                q = q.order_by(ProductTranslation.name)
 
         # pagination
-        total = q.distinct().count()
         skip = (page - 1) * limit
         products = q.offset(skip).limit(limit).all()
 
