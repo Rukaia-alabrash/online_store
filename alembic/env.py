@@ -1,6 +1,7 @@
 import os
 from logging.config import fileConfig
 
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
@@ -11,11 +12,11 @@ from app.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
+load_dotenv()
 config = context.config
-
 # 2. Dynamically set the sqlalchemy.url from environment variables
 # This overrides whatever is written in alembic.ini
-db_url = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost/dbname")
+db_url = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 config.set_main_option("sqlalchemy.url", db_url)
 
 # Interpret the config file for Python logging.

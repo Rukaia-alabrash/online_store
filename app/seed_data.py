@@ -1,6 +1,12 @@
-from alembic.migration import contextmanager
+from contextlib import contextmanager
+from pathlib import Path
+import sys
+
+if __package__ in {None, ""}:
+    sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from dotenv import load_dotenv
-from app.database import SessionLocal, get_db
+from app.database import SessionLocal
 from app.models.user import User, UserRole
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -20,17 +26,18 @@ def get_db_session():
 
 def seed_user(db: Session):
     # Check if the user already exists to avoid duplicates.
-    existing = db.query(User).filter(User.email == "rukaia@gmail.com").first()
+    email = "user@test.com"
+    existing = db.query(User).filter(User.email == email).first()
     if existing:
         return
     
-    password = pwd_context.hash("del1234")
+    password = pwd_context.hash("user1234")
 
     user = User(
-        name="del",
-        email="del@test.com",
+        name="user",
+        email=email,
         password=password,
-        role=UserRole.ADMIN,
+        role=UserRole.USER,
     )
     db.add(user)
     db.commit()

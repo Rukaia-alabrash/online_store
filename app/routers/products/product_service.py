@@ -24,16 +24,18 @@ def filter_products(
   maxPrice: float = None,
   rating: float = None      
 ):
+    
+    q = q.join(Product.product_translations).filter(ProductTranslation.lang_code == lang)
+
     if category:
-        q = q.join(Product.product_translations) \
-            .join(ProductTranslation.category) \
+        q = q.join(ProductTranslation.category) \
             .filter(
-                ProductTranslation.lang_code == lang,
                 Category.name.ilike(f"%{category}%")
             )
     if search:
-        q = q.join(Product.product_translations).filter(ProductTranslation.lang_code == lang,
-            or_(ProductTranslation.name.ilike(f"%{search}%"), ProductTranslation.description.ilike(f"%{search}%"))
+        q = q.filter(
+            or_(ProductTranslation.name.ilike(f"%{search}%"),
+                 ProductTranslation.description.ilike(f"%{search}%"))
         )
     if minPrice is not None:
         q = q.filter(Product.price >= minPrice)
@@ -46,48 +48,40 @@ def filter_products(
 
 def _serialize(product: Product, lang: str) -> ProductOut:
     """Convert ORM Product → ProductOut using the requested language."""
- 
+
     # Translation: name + description
     translation = next(
         (t for t in product.product_translations if t.lang_code == lang), None
     )
-    
-    if not translation: 
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product translation not found for the requested language")
 
-    name        = translation.name        if translation else ""
-    description = translation.description if translation else ""
- 
-    # Category
-    category = translation.category.name  if translation else ""
+    if not translation:
+        raise HTTPException(status_code=404, detail="Product not found in the requested language")
 
-    
     # Images
     primary_image = next((img.url for img in product.images if img.is_primary), "")
     all_images    = [img.url for img in product.images if not img.is_primary]
     if not primary_image and all_images:
         primary_image = all_images[0]
- 
-    # Features filtered by lang, fallback to English
+
+    # Features filtered by lang
     features = [f.name for f in product.features if f.lang_code == lang]
-    
- 
+
     return ProductOut(
         id=product.id,
-        name=name,
-        description=description,
+        name=translation.name,
+        description=translation.description,
         price=product.price,
-        category=category,
+        category=translation.category.name,
         image=primary_image,
         images=all_images,
         rating=product.average_rating,
-        reviews=product.reviews_count,  
+        reviews=product.reviews_count,
         stock=product.stock,
         features=features,
         discountPercentage=product.discount_percentage or 0,
-        discountExpiry= product.discount_expiry,
-        createdAt= product.created_at,
-        updatedAt= product.updated_at if product.updated_at else None,
+        discountExpiry=product.discount_expiry,
+        createdAt=product.created_at,
+        updatedAt=product.updated_at,
     )
 
 
@@ -134,11 +128,11 @@ class ProductService:
                 q = q.join(Product.product_translations).order_by(ProductTranslation.name)
 
         # pagination
-        total = q.count() 
+        total = q.distinct().count()
         skip = (page - 1) * limit
         products = q.offset(skip).limit(limit).all()
 
-        serialized = [_serialize(p, lang) for p in products]
+        serialized = [_serialize(p, lang) for p in products if _serialize(p, lang) is not None]
 
         # all categories
         all_categories = db.query(Category).filter(Category.lang_code == lang).all()   
@@ -214,13 +208,13 @@ class ProductService:
     
 
     @staticmethod
-    def upload_product_images(product_id:int, files: List[UploadFile], lang:str, db:Session)-> dict:
+    async def upload_product_images(product_id:int, files: List[UploadFile], db:Session)-> dict:
         product = db.query(Product).filter(Product.id == product_id).first()
         if not product:
             raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Product not found")
         
         for index , file in enumerate(files):
-            result = upload_to_cloudinary(file, folder="products", max_size_mb= 5)
+            result = await upload_to_cloudinary(file, folder="products", max_size_mb= 5)
 
             db.add(ProductImage(
                 product_id  = product_id,

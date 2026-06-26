@@ -6,14 +6,14 @@ from app.database import get_db
 from app.dependencies import require_admin, get_current_user
 from app.models.user import User , UserRole 
 from app.routers.shared.auth_service import AuthService
-from app.routers.users import pagination_user, user_out ,user_shema
+from app.routers.users import user_shema
 from app.routers.users.user_service import BasicService, UserReader, UserWriter 
 import math
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 # Get users with pagination, filtering by role and searching by name or email
-@router.get("/", response_model=pagination_user.PaginationUser)
+@router.get("/", response_model=user_shema.PaginationUser)
 def get_users(page: int = Query(1,ge=1), 
             limit: int = Query(10, ge=1, le=100),
             role: Optional[UserRole] = None,
@@ -31,9 +31,9 @@ def get_users(page: int = Query(1,ge=1),
     users = query.limit(limit).offset((page-1)*limit).all()
 
     # Return paginated response with user data and pagination metadata
-    return pagination_user.PaginationUser(
-        users=[user_out.UserOut.from_orm(user) for user in users],
-        pagination=pagination_user.Pagination(
+    return user_shema.PaginationUser(
+        users=[user_shema.UserOut.from_orm(user) for user in users],
+        pagination=user_shema.Pagination(
             page=page,
             limit=limit,
             total=total,
@@ -42,7 +42,7 @@ def get_users(page: int = Query(1,ge=1),
     )
 
 # Put endpoint to update user details, only accessible by the user themselves or an admin
-@router.put("/{id}", response_model=user_out.UserOut)
+@router.put("/{id}", response_model=user_shema.UserOut)
 def update_user(id : int ,
                 current_user: User =Depends(get_current_user),
                 db: Session = Depends(get_db),
@@ -56,7 +56,7 @@ def update_user(id : int ,
     service = UserWriter(db)
     user = service.update_user(id=id, current_user=current_user, name=body.name, email=body.email, avatar=body.avatar, role=body.role)
     
-    return user_out.UserOut.from_orm(user)
+    return user_shema.UserOut.from_orm(user)
 
 # Delete endpoint to remove a user, only accessible by admins
 @router.delete("/{id}")
@@ -64,7 +64,6 @@ def delete_user(id : int ,
                 current_user: User = Depends(require_admin),
                 db: Session = Depends(get_db)):
     
-    #Delete the user using the UserWriter service
     service = UserWriter(db)
     service.delete_user(id=id)
 
