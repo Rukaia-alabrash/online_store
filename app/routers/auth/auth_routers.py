@@ -13,6 +13,7 @@ from app.schemas import (
 )
 from app.dependencies import get_current_user, require_admin
 from app.routers.auth import auth_service
+from fastapi import BackgroundTasks
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -38,7 +39,10 @@ def refresh_token(data: RefreshTokenRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/forgot-password")
-def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
+def forgot_password(
+    data: ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+):
     return auth_service.forgot_password(data, db)
 
 

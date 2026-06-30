@@ -16,6 +16,8 @@ from app.schemas import (
     ChangePasswordRequest,
     ResetPasswordRequest,
 )
+from app.utils.email_sender import send_password_reset_email
+from fastapi import BackgroundTasks
 
 load_dotenv()
 
@@ -158,9 +160,11 @@ def forgot_password(data: ForgotPasswordRequest, db: Session) -> dict:
     user = db.query(User).filter(User.email == data.email).first()
     if user:
         reset_token = create_password_reset_token(user.email)
-        reset_link = f"http://localhost:3000/reset-password?token={reset_token}"
-        print(reset_link)  # مؤقتاً — لاحقاً بتتبدل بـ send email
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        reset_link = f"{frontend_url}/reset-password?token={reset_token}"
+        send_password_reset_email(user.email, reset_link)
     return {"message": "If an account with that email exists, a reset link has been sent."}
+
 
 
 def reset_password(data: ResetPasswordRequest, db: Session) -> dict:
