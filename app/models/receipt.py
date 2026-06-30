@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum , Numeric
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Enum , Numeric
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from app.database import Base
 import enum
 
@@ -24,6 +25,8 @@ class Receipt(Base):
     nullable=False,
     default=ReceiptStatus.PENDING
 )
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
     # relationships
     user             = relationship("User",           back_populates="receipts")
     shipping_address = relationship("ShippingAddress", back_populates="receipts")
