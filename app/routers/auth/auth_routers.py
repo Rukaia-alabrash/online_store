@@ -41,9 +41,10 @@ def refresh_token(data: RefreshTokenRequest, db: Session = Depends(get_db)):
 @router.post("/forgot-password")
 def forgot_password(
     data: ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    return auth_service.forgot_password(data, db)
+    return auth_service.forgot_password(data, background_tasks, db)
 
 
 @router.post("/reset-password")

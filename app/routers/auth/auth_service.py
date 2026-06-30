@@ -156,13 +156,13 @@ def refresh_access_token(data: RefreshTokenRequest, db: Session) -> dict:
     }
 
 
-def forgot_password(data: ForgotPasswordRequest, db: Session) -> dict:
+def forgot_password(data: ForgotPasswordRequest, background_tasks: BackgroundTasks, db: Session) -> dict:
     user = db.query(User).filter(User.email == data.email).first()
     if user:
         reset_token = create_password_reset_token(user.email)
         frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
         reset_link = f"{frontend_url}/reset-password?token={reset_token}"
-        send_password_reset_email(user.email, reset_link)
+        background_tasks.add_task(send_password_reset_email, user.email, reset_link)
     return {"message": "If an account with that email exists, a reset link has been sent."}
 
 
