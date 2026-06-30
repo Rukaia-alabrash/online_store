@@ -28,10 +28,10 @@ class PaymentService:
             db.query(ShippingAddress)
             .filter(
                 ShippingAddress.user_id == current_user.id,
-                ShippingAddress.full_name == payload.shippingAddress.full_name,
+                ShippingAddress.full_name == payload.shippingAddress.fullName,
                 ShippingAddress.address == payload.shippingAddress.address,
                 ShippingAddress.city == payload.shippingAddress.city,
-                ShippingAddress.zip_code == payload.shippingAddress.zip_code,
+                ShippingAddress.zip_code == payload.shippingAddress.zipCode,
             )
             .first()
         )
