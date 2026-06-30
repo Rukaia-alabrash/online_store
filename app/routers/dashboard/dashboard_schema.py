@@ -18,6 +18,7 @@ class PerformanceDataPoint(BaseModel):
 class CategoryDataPoint(BaseModel):
     name: str
     value: int
+    percentage: str
 
 
 class Alert(BaseModel):

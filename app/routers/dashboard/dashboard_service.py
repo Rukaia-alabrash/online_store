@@ -160,19 +160,34 @@ def _performance_data(db: Session) -> list:
 # ── توزيع الفئات ──────────────────────────────────────────────────────────────
 
 def _category_data(db: Session, lang: str = "en") -> list:
-    """عدد المنتجات لكل فئة بحسب اللغة المطلوبة"""
+    """
+    عدد المنتجات لكل فئة بحسب اللغة المطلوبة، مع نسبة كل فئة من الإجمالي.
+    يتم تطبيع الأسماء (lower + strip) لدمج الفئات المتطابقة بصرف النظر
+    عن حالة الأحرف، مثل "Sports" و "sports".
+    """
     rows = (
         db.query(
-            Category.name.label("name"),
+            func.lower(func.trim(Category.name)).label("name_key"),
             func.count(ProductTranslation.product_id).label("value"),
         )
         .join(ProductTranslation, ProductTranslation.category_id == Category.id)
         .filter(Category.lang_code == lang)
-        .group_by(Category.name)
+        .group_by("name_key")
         .all()
     )
-    return [{"name": row.name, "value": row.value} for row in rows]
 
+    total = sum(row.value for row in rows)
+    if total == 0:
+        return []
+
+    return [
+        {
+            "name": row.name_key.capitalize(),
+            "value": row.value,
+            "percentage": f"{round((row.value / total) * 100)}%",
+        }
+        for row in rows
+    ]
 
 # ── أفضل المنتجات مبيعاً ──────────────────────────────────────────────────────
 
