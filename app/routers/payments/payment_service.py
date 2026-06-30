@@ -38,10 +38,10 @@ class PaymentService:
         if not shipping_address:
             shipping_address = ShippingAddress(
                 user_id=current_user.id,
-                full_name=payload.shippingAddress.full_name,
+                full_name=payload.shippingAddress.fullName,
                 address=payload.shippingAddress.address,
                 city=payload.shippingAddress.city,
-                zip_code=payload.shippingAddress.zip_code,
+                zip_code=payload.shippingAddress.zipCode,
             )
             db.add(shipping_address)
             db.flush()
