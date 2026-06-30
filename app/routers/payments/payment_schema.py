@@ -11,10 +11,10 @@ class OrderItemIn(BaseModel):
     price: float
 
 class ShippingAddressIn(BaseModel):
-    full_name: str
+    fullName: str
     address: str
     city: str
-    zip_code: str
+    zipCode: str
 
 
 class CreatePaymentIntentRequest(BaseModel):

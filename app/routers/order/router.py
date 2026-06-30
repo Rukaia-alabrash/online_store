@@ -43,20 +43,20 @@ def list_orders(
     )
 
 
-@router.post("", response_model=OrderOut, status_code=status.HTTP_201_CREATED)
-def create_order(
-    order_data: OrderCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    if str(current_user.id) != order_data.user_id:
-        raise HTTPException(status_code=403, detail="Cannot create an order on behalf of another user")
+# @router.post("", response_model=OrderOut, status_code=status.HTTP_201_CREATED)
+# def create_order(
+#     order_data: OrderCreate,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_user),
+# ):
+#     if str(current_user.id) != order_data.user_id:
+#         raise HTTPException(status_code=403, detail="Cannot create an order on behalf of another user")
 
-    writer = OrderWriter(db)
-    receipt = writer.create_order(order_data)
+#     writer = OrderWriter(db)
+#     receipt = writer.create_order(order_data)
 
-    reader = OrderReader(db)
-    return reader.to_order_out(receipt)
+#     reader = OrderReader(db)
+#     return reader.to_order_out(receipt)
 
 
 @router.patch("/{order_id}/status", response_model=OrderOut)
