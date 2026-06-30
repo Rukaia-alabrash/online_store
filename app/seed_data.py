@@ -26,18 +26,18 @@ def get_db_session():
 
 def seed_user(db: Session):
     # Check if the user already exists to avoid duplicates.
-    email = "user@test.com"
+    email = "admin@test.com"
     existing = db.query(User).filter(User.email == email).first()
     if existing:
         return
     
-    password = pwd_context.hash("user1234")
+    password = pwd_context.hash("admin1234")
 
     user = User(
-        name="user",
+        name="admin",
         email=email,
         password=password,
-        role=UserRole.USER,
+        role=UserRole.ADMIN,  # Set the role to admin
     )
     db.add(user)
     db.commit()
