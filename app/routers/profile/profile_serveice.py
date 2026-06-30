@@ -39,18 +39,22 @@ class ProfileService:
     def get_profile(self, current_user: User) -> dict:
         return self._build_profile_dict(current_user)
 
-    def update_profile(self, current_user: User, name: str | None, address: str | None) -> dict:
+    def update_profile(self, current_user: User, db: Session, name: str | None, address: str | None, city:str , zip_code:str) -> dict:
         if name is not None:
             current_user.name = name
 
         if address is not None:
             latest_address = self._get_latest_address(current_user.id)
             if latest_address is None:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="No saved address found. Please complete a checkout first to add an address."
-                )
-            latest_address.address = address
+                latest_address = ShippingAddress(
+                user_id=current_user.id,
+                full_name=name,
+                address=address,
+                city=city,
+                zip_code=zip_code,
+            )
+                db.add(latest_address)
+                db.flush()
 
         self.db.commit()
         self.db.refresh(current_user)

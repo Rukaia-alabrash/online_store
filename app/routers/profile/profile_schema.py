@@ -18,6 +18,8 @@ class ProfileOut(BaseModel):
 class ProfileUpdate(BaseModel):
     name: Optional[str] = None
     address: Optional[str] = None
+    city: Optional[str] = None
+    zipCode: Optional[str] = None
 
 class AvatarOut(BaseModel):
     avatar: str

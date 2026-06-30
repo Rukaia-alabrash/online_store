@@ -29,7 +29,7 @@ def update_profile(
     db: Session = Depends(get_db),
 ):
     service = ProfileService(db)
-    profile = service.update_profile(current_user, name=body.name, address=body.address)
+    profile = service.update_profile(current_user,db ,name=body.name, address=body.address, city=body.city, zip_code=body.zipCode)
     return ProfileOut(**profile)
 
 
