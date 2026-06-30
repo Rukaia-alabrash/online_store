@@ -33,6 +33,8 @@ class ProfileService:
             "role": current_user.role,
             "avatar": current_user.avatar,
             "address": latest_address.address if latest_address else None,
+            "city": latest_address.city if latest_address else None,
+            "zipCode": latest_address.zip_code if latest_address else None,
             "created_at": current_user.created_at,
         }
 
@@ -53,6 +55,11 @@ class ProfileService:
                 city=city,
                 zip_code=zip_code,
             )
+            else:
+                latest_address.address = address
+                latest_address.city = city
+                latest_address.zip_code = zip_code
+                
                 db.add(latest_address)
                 db.flush()
 
