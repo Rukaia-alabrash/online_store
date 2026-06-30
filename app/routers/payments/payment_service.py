@@ -101,8 +101,9 @@ class PaymentService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=str(e.user_message),
             )
-        except stripe.error.StripeError:
+        except stripe.error.StripeError as e:
             db.rollback()
+            print(f"Stripe error: {e}")
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail="Payment processing error, please try again",
