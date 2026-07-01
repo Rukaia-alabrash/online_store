@@ -11,7 +11,7 @@ router = APIRouter(prefix="/profile", tags=["profile"])
 
 
 # Get the authenticated user's profile (name, email, role, avatar, address, created_at).
-# The user is identified entirely from the Bearer token — no id is passed.
+
 @router.get("/", response_model=ProfileOut)
 def get_profile(
     current_user: User = Depends(get_current_user),

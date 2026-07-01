@@ -194,16 +194,20 @@ def _category_data(db: Session, lang: str = "en") -> list:
 def _top_products(db: Session, lang: str = "en", limit: int = 5) -> list:
     """
     المنتجات مرتبةً حسب إجمالي الوحدات المباعة.
-    استعلام تجميعي واحد + استعلامان bulk — بدون أي N+1.
+    مفلترة حسب اللغة أولاً في الاستعلام الرئيسي.
     """
+    # 1. Base Query: Join Translations & Filter by Language FIRST
     rows = (
         db.query(
             Product.id,
             Product.price,
+            ProductTranslation.name,
             func.sum(OrderItem.quantity).label("sales"),
         )
         .join(OrderItem, OrderItem.product_id == Product.id)
-        .group_by(Product.id, Product.price)
+        .join(ProductTranslation, ProductTranslation.product_id == Product.id)
+        .filter(ProductTranslation.lang_code == lang)
+        .group_by(Product.id, Product.price, ProductTranslation.name)
         .order_by(func.sum(OrderItem.quantity).desc())
         .limit(limit)
         .all()
@@ -212,21 +216,10 @@ def _top_products(db: Session, lang: str = "en", limit: int = 5) -> list:
     if not rows:
         return []
 
+    # Extract IDs for the image query
     product_ids = [r.id for r in rows]
-    sales_map   = {r.id: int(r.sales) for r in rows}
-    price_map   = {r.id: r.price for r in rows}
 
-    # جلب الأسماء والصور بـ bulk query واحد لكل منهما — بدون N+1
-    translations = (
-        db.query(ProductTranslation)
-        .filter(
-            ProductTranslation.product_id.in_(product_ids),
-            ProductTranslation.lang_code == lang,
-        )
-        .all()
-    )
-    name_map = {t.product_id: t.name for t in translations}
-
+    # 2. Fetch Images in one bulk query (No N+1)
     images = (
         db.query(ProductImage)
         .filter(
@@ -237,16 +230,17 @@ def _top_products(db: Session, lang: str = "en", limit: int = 5) -> list:
     )
     image_map = {img.product_id: img.url for img in images}
 
-    # الحفاظ على ترتيب المبيعات
+    # 3. Build the final response 
+    # (Notice how much cleaner this is now that we don't need sales_map, price_map, or name_map!)
     return [
         {
-            "id": pid,
-            "name":  name_map.get(pid, ""),
-            "image": image_map.get(pid, ""),
-            "price": price_map.get(pid, 0.0),
-            "sales": sales_map[pid],
+            "id": r.id,
+            "name": r.name,
+            "image": image_map.get(r.id, ""),
+            "price": r.price,
+            "sales": int(r.sales),
         }
-        for pid in product_ids
+        for r in rows
     ]
 
 

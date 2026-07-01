@@ -7,7 +7,7 @@ from app.models.user import User, UserRole
 from typing import Optional
 from sqlalchemy import or_
 
-# Service classes to handle user-related operations, including reading and writing user data, as well as authorization checks for modifying user details.
+
 class BasicService :
     def __init__(self, db:Session):
         self.db = db 
