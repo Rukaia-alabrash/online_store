@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
@@ -29,7 +29,14 @@ class ShippingAddressIn(CamelModel):
     city: str
     zip_code: str
 
-
+class UserItemOut(CamelModel):
+    id: str
+    name: str
+    price: float
+    image: Optional[str] = None
+    rating: float
+    discount_percentage: Optional[float] = None
+    quantity: int
 class OrderItemOut(CamelModel):
     id: str
     price: float

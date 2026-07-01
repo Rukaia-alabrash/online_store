@@ -1,5 +1,5 @@
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from typing import Annotated, List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Header, Query, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -8,13 +8,30 @@ from app.models.user import User
 from app.models.receipt import ReceiptStatus
 
 from app.routers.order.schema import (
-    OrderOut, OrderCreate, UpdateOrderStatusBody, PaginatedOrders,
+    OrderOut, OrderCreate, UpdateOrderStatusBody, PaginatedOrders, UserItemOut,
 )
 from app.routers.order.service import OrderReader, OrderWriter
 from app.routers.shared.pagination import Pagination
 
 
 router = APIRouter(prefix="/orders", tags=["orders"])
+
+
+@router.get("/myOrders", response_model=List[UserItemOut])
+def get_my_orders(
+    accept_language: Annotated[str | None, Header()] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    lang = accept_language[:2] if accept_language else "en"
+
+    reader = OrderReader(db)
+    receipts = reader.get_orders_by_user_id(current_user.id)
+
+    if not receipts:
+        raise HTTPException(status_code=404, detail="No orders found")
+
+    return reader.user_order_items_out(receipts, lang)
 
 
 @router.get("", response_model=PaginatedOrders)

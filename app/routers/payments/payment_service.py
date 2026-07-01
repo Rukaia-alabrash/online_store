@@ -66,7 +66,7 @@ class PaymentService:
         receipt = Receipt(
             user_id=current_user.id,
             shipping_address_id=shipping_address.id,
-            total_price=payload.amount,
+            total_price=payload.amount/100,
             payment_status="pending",
             status=ReceiptStatus.PENDING,
         )

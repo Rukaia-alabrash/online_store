@@ -1,13 +1,16 @@
-from typing import Optional
+import datetime
+from datetime import datetime, timezone
+from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException, status
 
+from app.models.product import Product
 from app.models.receipt import Receipt, ReceiptStatus
 from app.models.order_item import OrderItem
 from app.models.shipping_address import ShippingAddress
 
 from app.routers.order.schema import (
-    OrderCreate, OrderOut, OrderItemOut, ShippingAddressOut,
+    OrderCreate, OrderOut, OrderItemOut, ShippingAddressOut, UserItemOut,
 )
 
 
@@ -61,6 +64,61 @@ class OrderReader:
             shipping_address=shipping_out,
         )
 
+    def get_orders_by_user_id(self, user_id: int):
+        return (
+            self.db.query(Receipt)
+            .options(
+                joinedload(Receipt.order_items)
+                .joinedload(OrderItem.product)
+                .joinedload(Product.product_translations),
+                joinedload(Receipt.order_items)
+                .joinedload(OrderItem.product)
+                .joinedload(Product.images),
+            )
+            .filter(Receipt.user_id == user_id)
+            .order_by(Receipt.id.desc())
+            .all()
+        )
+
+    def user_order_items_out(self, receipts: list[Receipt], lang: str = "en") -> list[UserItemOut]:
+        items_out = []
+
+        for receipt in receipts:
+            for oi in receipt.order_items:
+                product = oi.product
+                if not product:
+                    continue
+
+                translation = next(
+                    (t for t in product.product_translations if t.lang_code == lang),
+                    None,
+                )
+                if not translation:
+                    translation = next(iter(product.product_translations), None)
+                name = translation.name if translation else ""
+
+                image = None
+                if product.images:
+                    primary = next((img.url for img in product.images if img.is_primary), None)
+                    image = primary or product.images[0].url
+
+                discount = None
+                if product.discount_percentage and product.discount_percentage > 0:
+                    if not product.discount_expiry or product.discount_expiry >= datetime.now(timezone.utc):
+                        discount = product.discount_percentage
+
+                items_out.append(UserItemOut(
+                    id=str(oi.product_id),
+                    name=name,
+                    price=oi.price,
+                    image=image,
+                    rating=product.average_rating,
+                    discount_percentage=discount,
+                    quantity=oi.quantity,
+                ))
+
+        return items_out
+    
 
 class OrderWriter:
     TOTAL_TOLERANCE = 0.01
