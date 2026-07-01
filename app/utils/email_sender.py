@@ -1,27 +1,28 @@
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend
 
-SMTP_HOST = os.getenv("SMTP_HOST")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+# تهيئة مفتاح الـ API من متغيرات البيئة
+resend.api_key = os.getenv("RESEND_API_KEY")
 SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "Cartly")
 
+# ⚠️ ملاحظة هامة: في الباقة المجانية بدون توثيق دومين، يجب أن تستخدم هذا الإيميل كمرسِل
+FROM_EMAIL = "onboarding@resend.dev"
 
 def send_email(to_email: str, subject: str, html_body: str) -> None:
-    message = MIMEMultipart("alternative")
-    message["Subject"] = subject
-    message["From"] = f"{SMTP_FROM_NAME} <{SMTP_USER}>"
-    message["To"] = to_email
-
-    message.attach(MIMEText(html_body, "html"))
-
-    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
-        server.login(SMTP_USER, SMTP_PASSWORD)
-        server.sendmail(SMTP_USER, to_email, message.as_string())
-
+    try:
+        params = {
+            "from": f"{SMTP_FROM_NAME} <{FROM_EMAIL}>",
+            "to": [to_email],
+            "subject": subject,
+            "html": html_body,
+        }
+        
+        # إرسال الإيميل عبر واجهة برمجة التطبيقات (API)
+        email = resend.Emails.send(params)
+        print(f"Email sent successfully: {email}")
+        
+    except Exception as e:
+        print(f"Failed to send email: {e}")
 
 def send_password_reset_email(to_email: str, reset_link: str) -> None:
     subject = "Reset your password"
