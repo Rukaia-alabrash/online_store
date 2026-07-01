@@ -3,7 +3,7 @@ from fastapi.params import  Query
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_ , desc 
 
-from typing import Annotated, List
+from typing import List 
 from datetime import datetime
 
 from app.database import get_db
@@ -137,7 +137,7 @@ class ProductService:
 
         # all categories
         all_categories = db.query(Category).filter(Category.lang_code == lang).all()   
-        categories = list({c.name for c in all_categories})
+        categories = set({c.name.lower() for c in all_categories})
 
         return {
             'products': serialized,
@@ -153,8 +153,15 @@ class ProductService:
 
     @staticmethod
     def list_discounted_products(lang:str, db:Session)-> List[ProductOut]:
-         products = _eager_query(db).filter(Product.discount_percentage > 0.0 , Product.discount_expiry > datetime.now()).all()
-         return [_serialize(p, lang) for p in products]
+         
+        q = _eager_query(db)
+
+        q = filter_products(q,lang, None, None, None, None, None)
+
+        products = q.filter(Product.discount_percentage > 0.0 , Product.discount_expiry > datetime.now()).all()
+        if products is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No discounted products found")
+        return [_serialize(p, lang) for p in products]
     
 
     @staticmethod
@@ -177,9 +184,9 @@ class ProductService:
             # combine the features
             all_features = existing_features + new_features
 
-        category = db.query(Category).filter(Category.name == data.category, Category.lang_code == lang).first()
+        category = db.query(Category).filter(Category.name.lower() == data.category.lower(), Category.lang_code == lang).first()
         if not category:
-            category = Category(name = data.category, lang_code = lang)
+            category = Category(name = data.category.lower(), lang_code = lang)
             db.add(category)
             db.commit()
             db.refresh(category)
