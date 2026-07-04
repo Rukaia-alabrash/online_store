@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Header, status , UploadFile , File
 from fastapi.params import  Query
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_ , desc 
+from sqlalchemy import func, or_ , desc 
 
 from typing import List 
 from datetime import datetime
@@ -175,6 +175,7 @@ class ProductService:
     @staticmethod
     def create_product(data: ProductIn, lang:str, db:Session)-> ProductOut:
         features = data.features or []
+        all_features = []
         if features:
             # get the existing features
             existing_features = db.query(Feature).filter(Feature.name.in_(features), Feature.lang_code == lang).all()
@@ -184,7 +185,14 @@ class ProductService:
             # combine the features
             all_features = existing_features + new_features
 
-        category = db.query(Category).filter(Category.name.lower() == data.category.lower(), Category.lang_code == lang).first()
+        category = (
+            db.query(Category)
+                .filter(
+                    func.lower(Category.name) == data.category.lower(),
+                    Category.lang_code == lang,
+                )
+                .first()
+            )
         if not category:
             category = Category(name = data.category.lower(), lang_code = lang)
             db.add(category)
@@ -256,7 +264,7 @@ class ProductService:
 
             if not translation:
                 category_id = db.query(Category.id).filter(
-                    Category.name == data.category,
+                    func.lower(Category.name) == data.category.lower(),
                     Category.lang_code == lang
                 ).scalar()
                 translation = ProductTranslation(
@@ -274,7 +282,7 @@ class ProductService:
                     translation.description = data.description
                 if data.category:
                     category_id = db.query(Category.id).filter(
-                        Category.name == data.category,
+                        Category.name == data.category.lower(),
                         Category.lang_code == lang
                     ).scalar()
                     if category_id:
