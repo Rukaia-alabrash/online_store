@@ -19,6 +19,7 @@ class User(Base):
     password = Column(String(255), nullable=False)
     avatar = Column(String(1024), nullable=True)
     role = Column(Enum(UserRole), nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True, server_default="true")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now())
 
