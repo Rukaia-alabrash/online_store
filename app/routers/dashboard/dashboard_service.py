@@ -266,7 +266,7 @@ def _recent_orders(db: Session, limit: int = 5) -> list:
 
 # ── التنبيهات (محسوبة من البيانات الفعلية) ───────────────────────────────────
 
-def _alerts(db: Session) -> list:
+def _alerts(db: Session,lang:str="en") -> list:
     alerts = []
     alert_id = 1
 
@@ -276,11 +276,18 @@ def _alerts(db: Session) -> list:
         .scalar()
     )
     if low_stock_count:
-        alerts.append({
-            "id": alert_id, "type": "warning",
-            "message": f"Low stock for {low_stock_count} products",
-            "time": "just now",
-        })
+        if lang =="ar":
+            alerts.append({
+                "id": alert_id, "type": "warning",
+                "message": f"انخفاض المخزون ل {low_stock_count} من المنتجات",
+                "time": "الآن",
+            })
+        else:    
+            alerts.append({
+                "id": alert_id, "type": "warning",
+                "message": f"Low stock for {low_stock_count} products",
+                "time": "just now",
+            })
         alert_id += 1
 
     new_users_today = (
@@ -289,11 +296,18 @@ def _alerts(db: Session) -> list:
         .scalar()
     )
     if new_users_today:
-        alerts.append({
-            "id": alert_id, "type": "info",
-            "message": f"{new_users_today} new user(s) signed up today",
-            "time": "today",
-        })
+        if lang =="ar":
+            alerts.append({
+                "id": alert_id, "type": "info",
+                "message": f"{new_users_today} مستخدم(ين) جدد سجلوا اليوم",
+                "time": "اليوم",
+            })
+        else:
+            alerts.append({
+                "id": alert_id, "type": "info",
+                "message": f"{new_users_today} new user(s) signed up today",
+                "time": "today",
+            })
         alert_id += 1
 
     recent_delivered = (
@@ -305,11 +319,18 @@ def _alerts(db: Session) -> list:
         .scalar()
     )
     if recent_delivered:
-        alerts.append({
-            "id": alert_id, "type": "success",
-            "message": f"{recent_delivered} order(s) delivered today",
-            "time": "today",
-        })
+        if lang =="ar":
+            alerts.append({
+                "id": alert_id, "type": "success",
+                "message": f"{recent_delivered} طلب(ات) تم تسليمها اليوم",
+                "time": "اليوم",
+            })
+        else:
+            alerts.append({
+                "id": alert_id, "type": "success",
+                "message": f"{recent_delivered} order(s) delivered today",
+                "time": "today",
+            })
 
     return alerts
 
@@ -376,7 +397,7 @@ def get_dashboard_stats(db: Session, range_: str = "week", lang: str = "en") -> 
         "performanceData": _performance_data(db),
         "categoryData":    _category_data(db, lang),
 
-        "alerts":       _alerts(db),
+        "alerts":       _alerts(db,lang),
         "recentOrders": _recent_orders(db),
         "topProducts":  _top_products(db, lang),
     }
