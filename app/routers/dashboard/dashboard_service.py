@@ -365,7 +365,7 @@ def get_dashboard_stats(db: Session, range_: str = "week", lang: str = "en") -> 
     )
     low_stock = (
         db.query(func.count(Product.id))
-        .filter(Product.stock <= LOW_STOCK_THRESHOLD)
+        .filter(Product.stock <= LOW_STOCK_THRESHOLD, Product.stock > 0)
         .scalar()
     )
     new_customers = (
