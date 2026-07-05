@@ -272,7 +272,7 @@ def _alerts(db: Session,lang:str="en") -> list:
 
     low_stock_count = (
         db.query(func.count(Product.id))
-        .filter(Product.stock <= LOW_STOCK_THRESHOLD, Product.stock > 0)
+        .filter(Product.stock <= LOW_STOCK_THRESHOLD)
         .scalar()
     )
     if low_stock_count:
@@ -365,7 +365,7 @@ def get_dashboard_stats(db: Session, range_: str = "week", lang: str = "en") -> 
     )
     low_stock = (
         db.query(func.count(Product.id))
-        .filter(Product.stock <= LOW_STOCK_THRESHOLD, Product.stock > 0)
+        .filter(Product.stock <= LOW_STOCK_THRESHOLD)
         .scalar()
     )
     new_customers = (
